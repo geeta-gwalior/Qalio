@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "CommonJS",
+    "baseUrl": "./src",
+    "rootDir": "src",
+    "paths": {
+      "@models/*": ["models/*"],
+      "@models/university": ["models/university/university.model"],
+      "@models/student": ["models/student/student.model"],
+      "@models/company": ["models/company/company.model"],
+      "@models/college": ["models/college/college.model"],
+      "@models/user": ["models/user/college.model"],
+      "@types/*": ["types/*"]
+    },
+    "outDir": "dist",
+    "strict": true,
+    "esModuleInterop": true
+  }
+}
