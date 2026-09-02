@@ -1,6 +1,6 @@
 # Qalio Access Backend
 
-This is the backend for the Skill Access Application, built using **Node.js, Express, and TypeScript** with **MongoDB** as the database. It provides APIs for user management, assessments, and question handling.
+This is the backend for the Qalio Application, built using **Node.js, Express, and TypeScript** with **MongoDB** as the database. It provides APIs for user management, assessments, and question handling.
 
 ## API Documentation
 
