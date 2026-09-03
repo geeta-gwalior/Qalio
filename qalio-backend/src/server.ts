@@ -7,6 +7,7 @@ import connectDB from "./config/db"; // Import DB Connection
 import studentRoutes from "./routes/student/student.routes";
 import collegeRoutes from "./routes/college/college.routes";
 import companyRoutes from "./routes/company/company.routes";
+import knowledgeRoutes from "./routes/company/knowledge.routes";
 import universityRoutes from "./routes/university/university.routes";
 import authRoutes from "./routes/auth/auth.routes"; // Import auth routes
 import topicRoutes from "./routes/topic/topic.routes";
@@ -48,6 +49,7 @@ app.use("/uploads", express.static(path.join(process.cwd(), "public/uploads")));
 app.use("/api/student", studentRoutes);
 app.use("/api/college", collegeRoutes);
 app.use("/api/company", companyRoutes);
+app.use("/api/company/knowledge", knowledgeRoutes);
 app.use("/api/university", universityRoutes);
 app.use("/api/auth", authRoutes); // Register auth routes
 

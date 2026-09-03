@@ -109,7 +109,7 @@ export default function CollegeDashboard({
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header Section */}
-      <Card className="bg-gradient-to-r from-[#219CAE] to-[#19b8d0] text-white">
+      <Card className="bg-gradient-to-r from-indigo-600 via-indigo-700 to-slate-900 text-white rounded-2xl border-0 shadow-md">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">

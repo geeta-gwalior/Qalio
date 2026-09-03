@@ -1,73 +1,60 @@
-// const nodemailer = require("nodemailer");
+import nodemailer from "nodemailer";
 
-// const sendEmail = async (options: { email: any; subject: any; html?: any; message?: any }) => {
-//   try {
-//     const transporter = nodemailer.createTransport({
-//       host: process.env.SMTP_HOST,
-//       port: process.env.SMTP_PORT,
-//       // service: process.env.SMTP_SERVICE,
-//       secure:false,
-//       auth: {
-//         user: process.env.SMTP_USER,
-//         pass: process.env.SMTP_PASSWORD,
-//       },
-//     });
+export const createTransporter = () => {
+  const user = process.env.GMAIL_USER || process.env.SMTP_USER || process.env.SMTP_MAIL;
+  const pass = process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASSWORD;
 
-//     let mailOptions: any = {
-//       from: process.env.SMTP_MAIL,
-//       to: options.email,
-//       subject: options.subject,
-//     };
+  if (user && pass) {
+    return nodemailer.createTransport({
+      service: "gmail",
+      auth: { user, pass },
+    });
+  }
 
-//     if (options.html) {
-//       mailOptions.html = options.html;
-//     } else if (options.message) {
-//       mailOptions.text = options.message;
-//     }
-
-//     const mail = await transporter.sendMail(mailOptions);
-//     return { success: true, message: "Mail sent successfully", mail };
-//   } catch (error) {
-//     console.error(error);
-//     return { success: false, message: "Email not sent" };
-//   }
-// };
-
-// export default sendEmail;
-
-// utils/email/sendEmail.ts
-import { transporter } from "./smtp";
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST || "smtp.gmail.com",
+    port: Number(process.env.SMTP_PORT) || 587,
+    secure: false,
+    auth: {
+      user: user || "demo@qalio.com",
+      pass: pass || "demopassword",
+    },
+  });
+};
 
 const sendEmail = async (mailOptions: {
-  email: any;
-  subject: any;
-  html?: any;
-  message?: any;
+  email: string;
+  subject: string;
+  html?: string;
+  message?: string;
 }) => {
   try {
-    let options: any = {
-      from: process.env.SMTP_MAIL,
+    const user = process.env.GMAIL_USER || process.env.SMTP_USER || process.env.SMTP_MAIL;
+    const pass = process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASSWORD;
+
+    const options = {
+      from: `Qalio Hiring Platform <${user || "noreply@qalio.com"}>`,
       to: mailOptions.email,
       subject: mailOptions.subject,
+      html: mailOptions.html || mailOptions.message,
+      text: mailOptions.message,
     };
 
-    if (mailOptions.html) {
-      options.html = mailOptions.html;
-    } else if (mailOptions.message) {
-      options.text = mailOptions.message;
+    if (user && pass) {
+      const transporter = createTransporter();
+      const result = await transporter.sendMail(options);
+      console.log(`[EMAIL SUCCESS] Sent to ${mailOptions.email} (MessageID: ${result.messageId})`);
+      return { success: true, result };
+    } else {
+      console.log("====== PRODUCTION EMAIL LOG (Set GMAIL_USER & GMAIL_APP_PASSWORD to send live) ======");
+      console.log("To:", options.to);
+      console.log("Subject:", options.subject);
+      console.log("==================================================================================");
+      return { success: true, result: { messageId: "dev-simulated-id" } };
     }
-
-    console.log("====== MOCKED EMAIL SEND ======");
-    console.log("To:", options.to);
-    console.log("Subject:", options.subject);
-    console.log("Content:", options.text || options.html);
-    console.log("===============================");
-
-    // Simulate success
-    return { success: true, result: { messageId: "mocked-id" } };
-  } catch (error) {
-    console.error("Email send error:", error);
-    return { success: false, error };
+  } catch (error: any) {
+    console.error("Email send failure:", error);
+    return { success: false, error: error.message };
   }
 };
 

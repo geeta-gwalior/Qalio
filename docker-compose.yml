@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: qalio-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    build:
+      context: ./qalio-backend
+      dockerfile: Dockerfile
+    container_name: qalio-backend
+    restart: always
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - MONGO_URI=mongodb://mongodb:27017/qalio
+      - JWT_SECRET=production_secret_key_qalio_2026
+      - GMAIL_USER=${GMAIL_USER}
+      - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - mongodb
+
+  frontend:
+    build:
+      context: ./qalio-frontend
+      dockerfile: Dockerfile
+    container_name: qalio-frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_QALIO_BACKEND_URL=http://localhost:4000/api
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:

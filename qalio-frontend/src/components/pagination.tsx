@@ -18,6 +18,8 @@ export function Pagination({
 }: PaginationProps) {
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
+  if (totalPages <= 1) return null;
+
   // Determine range of pages to show
   let startPage = Math.max(currentPage - 1, 1);
   const endPage = Math.min(startPage + 2, totalPages);
@@ -33,15 +35,15 @@ export function Pagination({
   }
 
   return (
-    <div className={`flex mb-7 justify-center items-center gap-2 ${className}`}>
+    <div className={`flex my-6 justify-center items-center gap-2 ${className}`}>
       <Button
         variant="outline"
         size="icon"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="disabled:opacity-50"
+        className="rounded-xl border-slate-200 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 disabled:opacity-40"
       >
-        <ChevronLeft className="h-4 w-4 text-[#219CAE]" />
+        <ChevronLeft className="h-4 w-4" />
       </Button>
 
       {startPage > 1 && (
@@ -50,13 +52,15 @@ export function Pagination({
             variant={currentPage === 1 ? "default" : "outline"}
             size="icon"
             onClick={() => onPageChange(1)}
-            className={`${
-              currentPage === 1 ? "bg-[#219CAE] text-white" : "text-[#219CAE]"
+            className={`rounded-xl font-medium ${
+              currentPage === 1
+                ? "bg-indigo-600 text-white shadow-xs"
+                : "border-slate-200 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600"
             }`}
           >
             1
           </Button>
-          {startPage > 2 && <span className="text-[#219CAE]">...</span>}
+          {startPage > 2 && <span className="text-slate-400 font-medium px-1">...</span>}
         </>
       )}
 
@@ -66,8 +70,10 @@ export function Pagination({
           variant={currentPage === page ? "default" : "outline"}
           size="icon"
           onClick={() => onPageChange(page)}
-          className={`${
-            currentPage === page ? "bg-[#219CAE] text-white" : "text-[#219CAE]"
+          className={`rounded-xl font-medium ${
+            currentPage === page
+              ? "bg-indigo-600 text-white shadow-xs"
+              : "border-slate-200 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600"
           }`}
         >
           {page}
@@ -77,16 +83,16 @@ export function Pagination({
       {endPage < totalPages && (
         <>
           {endPage < totalPages - 1 && (
-            <span className="text-[#219CAE]">...</span>
+            <span className="text-slate-400 font-medium px-1">...</span>
           )}
           <Button
             variant={currentPage === totalPages ? "default" : "outline"}
             size="icon"
             onClick={() => onPageChange(totalPages)}
-            className={`${
+            className={`rounded-xl font-medium ${
               currentPage === totalPages
-                ? "bg-[#219CAE] text-white"
-                : "text-[#219CAE]"
+                ? "bg-indigo-600 text-white shadow-xs"
+                : "border-slate-200 text-slate-700 hover:bg-indigo-50 hover:text-indigo-600"
             }`}
           >
             {totalPages}
@@ -99,9 +105,9 @@ export function Pagination({
         size="icon"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="disabled:opacity-50"
+        className="rounded-xl border-slate-200 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 disabled:opacity-40"
       >
-        <ChevronRight className="h-4 w-4 text-[#219CAE]" />
+        <ChevronRight className="h-4 w-4" />
       </Button>
     </div>
   );

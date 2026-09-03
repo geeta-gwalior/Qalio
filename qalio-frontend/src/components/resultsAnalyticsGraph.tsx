@@ -146,9 +146,9 @@ export function ResultsAnalytics({
             {data.invitedCount !== undefined ? (
               <div className="space-y-2">
                 <div className="space-y-1">
-                  <p className="text-[#219CAE] text-sm font-medium">{`Appeared: ${payload[0].value} students`}</p>
-                  <p className="text-[#219CAE] text-sm font-medium">{`Invited: ${data.invitedCount} students`}</p>
-                  <p className="text-[#219CAE] text-sm font-medium">{`Participation: ${data.participationRate}%`}</p>
+                  <p className="text-indigo-600 text-sm font-medium">{`Appeared: ${payload[0].value} students`}</p>
+                  <p className="text-indigo-600 text-sm font-medium">{`Invited: ${data.invitedCount} students`}</p>
+                  <p className="text-indigo-600 text-sm font-medium">{`Participation: ${data.participationRate}%`}</p>
                 </div>
 
                 {/* Additional assessment details */}
@@ -246,9 +246,9 @@ export function ResultsAnalytics({
                 )}
               </div>
             ) : data.daysAgo !== undefined ? (
-              <p className="text-[#219CAE]">{`Created: ${data.daysAgo} days ago`}</p>
+              <p className="text-indigo-600 font-semibold">{`Created: ${data.daysAgo} days ago`}</p>
             ) : (
-              <p className="text-[#219CAE]">{`${yAxisLabel}: ${payload[0].value}`}</p>
+              <p className="text-indigo-600 font-semibold">{`${yAxisLabel}: ${payload[0].value}`}</p>
             )}
           </div>
         </div>
@@ -341,27 +341,27 @@ export function ResultsAnalytics({
                           >
                             <stop
                               offset="5%"
-                              stopColor="hsl(195, 83%, 85%)"
-                              stopOpacity={0.8}
+                              stopColor="#6366f1"
+                              stopOpacity={0.4}
                             />
                             <stop
                               offset="95%"
-                              stopColor="hsl(195, 83%, 85%)"
-                              stopOpacity={0.1}
+                              stopColor="#6366f1"
+                              stopOpacity={0.02}
                             />
                           </linearGradient>
                         </defs>
                         <CartesianGrid
                           vertical={false}
-                          stroke="#e5e7eb"
-                          strokeDasharray="5 5"
+                          stroke="#e2e8f0"
+                          strokeDasharray="4 4"
                         />
                         <XAxis
                           dataKey={xAxisKey}
                           tickLine={false}
                           axisLine={false}
                           tickMargin={2}
-                          stroke="#9ca3af"
+                          stroke="#64748b"
                           angle={0}
                           textAnchor="middle"
                           height={isMobile ? 25 : 30}
@@ -388,8 +388,8 @@ export function ResultsAnalytics({
                           type="monotone"
                           fill="url(#colorValue)"
                           fillOpacity={1}
-                          stroke="hsl(195, 83%, 75%)"
-                          strokeWidth={2}
+                          stroke="#4f46e5"
+                          strokeWidth={2.5}
                         />
                       </AreaChart>
                     </ChartContainer>
@@ -417,27 +417,27 @@ export function ResultsAnalytics({
                     <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
                       <stop
                         offset="5%"
-                        stopColor="hsl(195, 83%, 85%)"
-                        stopOpacity={0.8}
+                        stopColor="#6366f1"
+                        stopOpacity={0.4}
                       />
                       <stop
                         offset="95%"
-                        stopColor="hsl(195, 83%, 85%)"
-                        stopOpacity={0.1}
+                        stopColor="#6366f1"
+                        stopOpacity={0.02}
                       />
                     </linearGradient>
                   </defs>
                   <CartesianGrid
                     vertical={false}
-                    stroke="#e5e7eb"
-                    strokeDasharray="5 5"
+                    stroke="#e2e8f0"
+                    strokeDasharray="4 4"
                   />
                   <XAxis
                     dataKey={xAxisKey}
                     tickLine={false}
                     axisLine={false}
                     tickMargin={2}
-                    stroke="#9ca3af"
+                    stroke="#64748b"
                     angle={0}
                     textAnchor="middle"
                     height={isMobile ? 25 : 30}
@@ -456,7 +456,7 @@ export function ResultsAnalytics({
                     tickLine={false}
                     axisLine={false}
                     tickMargin={isMobile ? 4 : 6}
-                    stroke="#9ca3af"
+                    stroke="#64748b"
                     tickFormatter={(value) => value.toString()}
                     tick={{ fontSize: isMobile ? 10 : 11 }}
                     width={isMobile ? 45 : 50}
@@ -467,8 +467,8 @@ export function ResultsAnalytics({
                     type="monotone"
                     fill="url(#colorValue)"
                     fillOpacity={1}
-                    stroke="hsl(195, 83%, 75%)"
-                    strokeWidth={2}
+                    stroke="#4f46e5"
+                    strokeWidth={2.5}
                   />
                 </AreaChart>
               </ChartContainer>

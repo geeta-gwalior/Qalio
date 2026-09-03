@@ -1,21 +1,26 @@
-# Use Node.js 20
-FROM node:20
+# Dockerfile for Qalio Express Backend API
+FROM node:20-alpine AS builder
 
-# Set working directory
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Install dependencies
-COPY package*.json ./
-RUN npm install
+COPY package*.json pnpm-lock.yaml ./
+RUN npm install -g pnpm && pnpm install --frozen-lockfile || npm install
 
-# Copy all source code
 COPY . .
-
-# Build TypeScript code
 RUN npm run build
 
-# Expose the port
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV PORT=4000
+
+COPY package*.json ./
+RUN npm install --only=production
+
+COPY --from=builder /app/dist ./dist
+
 EXPOSE 4000
 
-# Start the application
-CMD ["npm", "start"]
+CMD ["node", "dist/server.js"]

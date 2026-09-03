@@ -273,7 +273,7 @@ export function InviteModal({
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="bg-[#219CAE]"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-xs transition-all font-medium"
               >
                 {isLoading ? "Sending..." : "Send Invitation"}
               </Button>

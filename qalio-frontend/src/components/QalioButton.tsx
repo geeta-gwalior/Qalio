@@ -46,7 +46,7 @@ const CustomButton = React.forwardRef<HTMLButtonElement, CustomButtonProps>(
       variant,
       size,
       asChild = false,
-      backgroundColor = "#4DB6AC", // Default teal color similar to the screenshot
+      backgroundColor = "#4f46e5", // Modern indigo primary brand color
       textColor = "white",
       fontSize = "1rem",
       fontWeight = "medium",

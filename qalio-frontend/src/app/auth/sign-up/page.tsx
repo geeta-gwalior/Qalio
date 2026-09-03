@@ -165,63 +165,38 @@ export default function Register() {
 
       const { token, user } = result;
 
-      // Set cookies with expiry time based on rememberMe
+      const isSecure = typeof window !== "undefined" && window.location.protocol === "https:";
+
       const expiryTime = values.rememberMe
-        ? Number(process.env.NEXT_PUBLIC_AUTH_TOKEN_EXPIRY_TIME || "0.0416") // ~1h default
+        ? Number(process.env.NEXT_PUBLIC_AUTH_TOKEN_EXPIRY_TIME || "0.0416")
         : undefined;
 
-      // Set JWT cookie
-      if (expiryTime) {
-        cookies.set("jwt", token, {
-          expires: expiryTime,
-          secure: true,
-          sameSite: "strict",
-          path: "/",
-        });
-      } else {
-        cookies.set("jwt", token, {
-          secure: true,
-          sameSite: "strict",
-          path: "/",
-        });
-      }
+      cookies.set("jwt", token, {
+        expires: expiryTime,
+        secure: isSecure,
+        sameSite: "lax",
+        path: "/",
+      });
 
-      // Set user details cookie
       const userDetailsValue = encodeURIComponent(JSON.stringify(user));
-      if (expiryTime) {
-        cookies.set("userDetails", userDetailsValue, {
-          expires: expiryTime,
-          secure: true,
-          sameSite: "strict",
-          path: "/",
-        });
-      } else {
-        cookies.set("userDetails", userDetailsValue, {
-          secure: true,
-          sameSite: "strict",
-          path: "/",
-        });
-      }
+      cookies.set("userDetails", userDetailsValue, {
+        expires: expiryTime,
+        secure: isSecure,
+        sameSite: "lax",
+        path: "/",
+      });
 
-      // Set auth state with user data and token
       setAuth(user, token);
 
       toast.success("Registration successful", {
-        description: `Welcome, ${user.firstName || user.name || "User"}!`,
+        description: `Welcome to Qalio, ${user.firstName || user.name || "User"}!`,
       });
 
-      router.push("/student/dashboard");
-
-      // Log the redirect path for debugging
       const redirectPath = `/${user.role.toLowerCase()}/dashboard`;
-
-      // Add a small delay before redirecting
-      setTimeout(() => {
-        router.push(redirectPath);
-      }, 500);
+      router.push(redirectPath);
     } catch (error: any) {
       toast.error("Something went wrong", {
-        description: "Please try again later.",
+        description: "Please check your network and try again.",
       });
     } finally {
       setLoading(false);
@@ -237,41 +212,41 @@ export default function Register() {
   };
 
   return (
-    <div className="">
-      <h1 className="text-[40px] font-bold text-[#242424] leading-[58px]">
-        Create Account
-      </h1>
-      <p className="text-[16px] font-medium text-[#242424] leading-[23px] mt-[6px]">
-        Create an account to continue!
-      </p>
+    <div className="w-full space-y-5">
+      <div className="space-y-1 text-left">
+        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+          Create Account
+        </h1>
+        <p className="text-sm text-slate-500 font-normal">
+          Get started with Qalio today!
+        </p>
+      </div>
 
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="mt-[40px] space-y-[20px]"
+          className="space-y-3.5"
         >
           {/* Full Name */}
           <FormField
             control={form.control}
             name="name"
             render={({ field }) => (
-              <FormItem className="space-y-[6px]">
-                <FormLabel className="text-[16px] text-[#242424] leading-[23px]">
+              <FormItem className="space-y-1">
+                <FormLabel className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
                   Full Name
                 </FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <div className="absolute left-[20px] top-1/2 -translate-y-1/2 text-[#242424]">
-                      <User size={16} />
-                    </div>
+                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4" />
                     <Input
-                      placeholder="Enter your full name"
-                      className="h-[60px] pl-[46px] border border-[#242424] rounded-[10px] text-[16px]"
+                      placeholder="John Doe"
+                      className="h-10 pl-10 rounded-xl border-slate-200 bg-slate-50/50 text-slate-900 focus:bg-white focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                       {...field}
                     />
                   </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs text-rose-500" />
               </FormItem>
             )}
           />
@@ -281,24 +256,22 @@ export default function Register() {
             control={form.control}
             name="email"
             render={({ field }) => (
-              <FormItem className="space-y-[6px]">
-                <FormLabel className="text-[16px] text-[#242424] leading-[23px]">
+              <FormItem className="space-y-1">
+                <FormLabel className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
                   Email Address
                 </FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <div className="absolute left-[20px] top-1/2 -translate-y-1/2 text-[#242424]">
-                      <Mail size={16} />
-                    </div>
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4" />
                     <Input
                       type="email"
-                      placeholder="Enter your email"
-                      className="h-[60px] pl-[46px] border border-[#242424] rounded-[10px] text-[16px]"
+                      placeholder="name@example.com"
+                      className="h-10 pl-10 rounded-xl border-slate-200 bg-slate-50/50 text-slate-900 focus:bg-white focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                       {...field}
                     />
                   </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs text-rose-500" />
               </FormItem>
             )}
           />
@@ -308,9 +281,9 @@ export default function Register() {
             control={form.control}
             name="role"
             render={({ field }) => (
-              <FormItem className="space-y-[6px]">
-                <FormLabel className="text-[16px] text-[#242424] leading-[23px]">
-                  Role
+              <FormItem className="space-y-1">
+                <FormLabel className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                  Select Role
                 </FormLabel>
                 <FormControl>
                   <div className="relative">
@@ -318,23 +291,21 @@ export default function Register() {
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
-                      <SelectTrigger className="!h-[60px] w-full pl-[46px] border border-[#242424] rounded-[10px] text-[16px]">
-                        <div className="absolute left-[20px] top-1/2 -translate-y-1/2 text-[#242424]">
+                      <SelectTrigger className="h-10 w-full pl-10 rounded-xl border-slate-200 bg-slate-50/50 text-slate-900 focus:bg-white focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
                           {roleIcons[field.value as keyof typeof roleIcons]}
                         </div>
                         <SelectValue placeholder="Select your role" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="rounded-xl border-slate-200">
                         <SelectItem value="student">Student</SelectItem>
-                        {/* <SelectItem value="university">University</SelectItem> */}
                         <SelectItem value="college">College</SelectItem>
                         <SelectItem value="company">Company</SelectItem>
-                        {/* <SelectItem value="others">Others</SelectItem> */}
                       </SelectContent>
                     </Select>
                   </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs text-rose-500" />
               </FormItem>
             )}
           />
@@ -344,20 +315,18 @@ export default function Register() {
             control={form.control}
             name="phone"
             render={({ field }) => (
-              <FormItem className="space-y-[6px]">
-                <FormLabel className="text-[16px] text-[#242424] leading-[23px]">
+              <FormItem className="space-y-1">
+                <FormLabel className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
                   Contact Number
                 </FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <div className="absolute left-[20px] top-1/2 -translate-y-1/2 text-[#242424]">
-                      <Phone size={16} />
-                    </div>
+                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4" />
                     <Input
-                      placeholder="Enter 10-digit phone number"
+                      placeholder="10-digit mobile number"
                       type="tel"
                       inputMode="numeric"
-                      className="h-[60px] pl-[46px] border border-[#242424] rounded-[10px] text-[16px]"
+                      className="h-10 pl-10 rounded-xl border-slate-200 bg-slate-50/50 text-slate-900 focus:bg-white focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                       maxLength={10}
                       {...field}
                       onChange={(e) => {
@@ -369,7 +338,7 @@ export default function Register() {
                     />
                   </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs text-rose-500" />
               </FormItem>
             )}
           />
@@ -379,30 +348,28 @@ export default function Register() {
             control={form.control}
             name="password"
             render={({ field }) => (
-              <FormItem className="space-y-[6px]">
-                <FormLabel className="text-[16px] text-[#242424] leading-[23px]">
+              <FormItem className="space-y-1">
+                <FormLabel className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
                   Create Password
                 </FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <div className="absolute left-[20px] top-1/2 -translate-y-1/2 text-[#242424]">
-                      <Lock size={16} />
-                    </div>
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4" />
                     <Input
                       type={showPassword ? "text" : "password"}
-                      placeholder="Enter password"
-                      className="h-[60px] pl-[46px] pr-[46px] border border-[#242424] rounded-[10px] text-[16px]"
+                      placeholder="At least 8 characters"
+                      className="h-10 pl-10 pr-10 rounded-xl border-slate-200 bg-slate-50/50 text-slate-900 focus:bg-white focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                       {...field}
                     />
                     <div
-                      className="absolute right-[20px] top-1/2 -translate-y-1/2 cursor-pointer text-[#BDBDBD]"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 cursor-pointer text-slate-400 hover:text-slate-600"
                       onClick={() => setShowPassword(!showPassword)}
                     >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </div>
                   </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs text-rose-500" />
               </FormItem>
             )}
           />
@@ -412,57 +379,34 @@ export default function Register() {
             control={form.control}
             name="confirmPassword"
             render={({ field }) => (
-              <FormItem className="space-y-[6px]">
-                <FormLabel className="text-[16px] text-[#242424] leading-[23px]">
+              <FormItem className="space-y-1">
+                <FormLabel className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
                   Confirm Password
                 </FormLabel>
                 <FormControl>
                   <div className="relative">
-                    <div className="absolute left-[20px] top-1/2 -translate-y-1/2 text-[#242424]">
-                      <Lock size={16} />
-                    </div>
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4" />
                     <Input
                       type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Confirm password"
-                      className="h-[60px] pl-[46px] pr-[46px] border border-[#242424] rounded-[10px] text-[16px]"
+                      placeholder="Re-enter password"
+                      className="h-10 pl-10 pr-10 rounded-xl border-slate-200 bg-slate-50/50 text-slate-900 focus:bg-white focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                       {...field}
                     />
                     <div
-                      className="absolute right-[20px] top-1/2 -translate-y-1/2 cursor-pointer text-[#BDBDBD]"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 cursor-pointer text-slate-400 hover:text-slate-600"
                       onClick={() =>
                         setShowConfirmPassword(!showConfirmPassword)
                       }
                     >
                       {showConfirmPassword ? (
-                        <EyeOff size={18} />
+                        <EyeOff size={16} />
                       ) : (
-                        <Eye size={18} />
+                        <Eye size={16} />
                       )}
                     </div>
                   </div>
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Remember Me */}
-          <FormField
-            control={form.control}
-            name="rememberMe"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center space-x-3">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    className="w-[16px] h-[16px] border rounded-[4px]
-            data-[state=checked]:bg-[#219CAE] data-[state=checked]:text-white data-[state=checked]:border-[#219CAE]"
-                  />
-                </FormControl>
-                <FormLabel className="text-[14px] text-[#242424] font-normal m-0">
-                  Remember me
-                </FormLabel>
+                <FormMessage className="text-xs text-rose-500" />
               </FormItem>
             )}
           />
@@ -472,34 +416,33 @@ export default function Register() {
             control={form.control}
             name="terms"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-center space-x-3 mt-[20px]">
+              <FormItem className="flex flex-row items-start space-x-2.5 space-y-0 pt-1">
                 <FormControl>
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
-                    className="w-[16px] h-[16px] border rounded-[4px]
-            data-[state=checked]:bg-[#219CAE] data-[state=checked]:text-white data-[state=checked]:border-[#219CAE]"
+                    className="rounded-md border-slate-300 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600 mt-0.5"
                   />
                 </FormControl>
                 <div className="flex flex-col space-y-1 leading-none">
-                  <FormLabel className="text-[14px] text-[#242424] font-normal">
-                    By creating your account, you agree with our{" "}
+                  <FormLabel className="text-xs text-slate-600 font-normal leading-normal">
+                    I agree with the{" "}
                     <Link
                       href="/terms-and-conditions"
-                      className="text-[#219CAE] underline"
+                      className="text-indigo-600 font-medium hover:underline"
                     >
                       Terms & Conditions
                     </Link>{" "}
                     and{" "}
                     <Link
                       href="/terms-and-conditions"
-                      className="text-[#219CAE] underline"
+                      className="text-indigo-600 font-medium hover:underline"
                     >
                       Privacy Policy
                     </Link>
                     .
                   </FormLabel>
-                  <FormMessage />
+                  <FormMessage className="text-xs text-rose-500" />
                 </div>
               </FormItem>
             )}
@@ -509,7 +452,7 @@ export default function Register() {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full h-[55px] bg-[#219CAE] text-white rounded-[10px] text-[16px] font-semibold mt-[40px]"
+            className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-all shadow-xs mt-3"
           >
             {loading ? "Creating Account..." : "Sign Up"}
           </Button>
@@ -517,12 +460,13 @@ export default function Register() {
       </Form>
 
       {/* Sign in link */}
-      <p className="my-4 text-center">
+      <p className="pt-2 text-center text-xs text-slate-500 border-t border-slate-100">
         Already have an account?{" "}
-        <Link href="/auth/sign-in" className="text-[#FF9900] font-semibold">
+        <Link href="/auth/sign-in" className="text-indigo-600 font-semibold hover:underline">
           Sign In
         </Link>
       </p>
     </div>
   );
 }
+

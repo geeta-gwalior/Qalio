@@ -16,7 +16,6 @@ import {
 import { roleBasedMenus } from "@/constants";
 import { useAuthStore } from "@/stores/auth-store";
 import Link from "next/link";
-import Image from "next/image";
 import QalioLogo from "@/components/common/QalioLogo";
 import { usePathname, useRouter } from "next/navigation";
 import { useMemo } from "react";
@@ -30,12 +29,12 @@ function SidebarToggleButton() {
       variant="ghost"
       size="icon"
       onClick={toggleSidebar}
-      className="absolute right-2 top-4 h-8 w-8 rounded-full bg-blue-50 hover:bg-blue-100"
+      className="absolute right-2 top-4 h-7 w-7 rounded-full bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-500 shadow-xs border border-slate-200/60 transition-all"
     >
       {isExpanded ? (
-        <ChevronLeft className="h-4 w-4 text-[#219CAE]" />
+        <ChevronLeft className="h-4 w-4" />
       ) : (
-        <ChevronRight className="h-4 w-4 text-[#219CAE]" />
+        <ChevronRight className="h-4 w-4" />
       )}
       <span className="sr-only">
         {isExpanded ? "Collapse sidebar" : "Expand sidebar"}
@@ -66,14 +65,14 @@ export function AppSidebar({
 
   return (
     <Sidebar
-      className="w-64 border-r min-h-[calc(100vh-4rem)] space-y-2 bg-transparent shadow-lg transition-all duration-300"
+      className="w-64 border-r border-slate-200/80 min-h-screen bg-white shadow-sm transition-all duration-300 z-[45]"
       collapsible="icon"
     >
-      <SidebarHeader className={`p-4 pt-8 pb-2 bg-white relative`}>
+      <SidebarHeader className="p-5 pt-6 pb-4 bg-white relative border-b border-slate-100">
         <div
-          className={`w-full flex flex-row items-center justify-center transition-transform ${
-            !isExpanded ? "scale-75" : ""
-          }`}
+          className={`w-full flex items-center ${
+            !isExpanded ? "justify-center scale-90" : "justify-start px-2"
+          } transition-transform duration-200`}
         >
           {isExpanded ? (
             <QalioLogo size="md" />
@@ -82,8 +81,9 @@ export function AppSidebar({
           )}
         </div>
       </SidebarHeader>
-      <SidebarContent className={`${!isExpanded ? "px-2" : "px-4"} bg-white`}>
-        <SidebarMenu className="mt-10 gap-4">
+
+      <SidebarContent className={`${!isExpanded ? "px-2" : "px-3"} py-4 bg-white`}>
+        <SidebarMenu className="gap-1.5">
           {menuItems.map((item) => {
             const isActive = pathname.startsWith(item.url);
             return (
@@ -92,16 +92,20 @@ export function AppSidebar({
                   asChild
                   tooltip={item.title}
                   isActive={isActive}
-                  className={`rounded-4x font-[Jost] p-4 ${
-                    isActive ? "!bg-blue-50 font-medium" : ""
-                  } hover:bg-blue-50 text-lg`}
+                  className={`rounded-xl font-medium px-3.5 py-2.5 h-11 transition-all duration-200 ${
+                    isActive
+                      ? "!bg-indigo-50/80 !text-indigo-600 font-semibold shadow-xs border border-indigo-100/80"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/70"
+                  }`}
                 >
                   <Link
                     href={item.url}
-                    className="flex items-center gap-3 h-11"
+                    className="flex items-center gap-3.5 w-full"
                   >
-                    <item.icon className="h-5 w-5 text-[#219CAE]" />
-                    <span>{item.title}</span>
+                    <item.icon className={`h-5 w-5 shrink-0 transition-colors ${
+                      isActive ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-600"
+                    }`} />
+                    <span className="text-sm truncate">{item.title}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -109,22 +113,21 @@ export function AppSidebar({
           })}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter
-        className={`mt-auto ${!isExpanded ? "px-2" : "px-4"} bg-white`}
-      >
+
+      <SidebarFooter className={`mt-auto ${!isExpanded ? "px-2" : "px-3"} py-4 bg-white border-t border-slate-100`}>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
               tooltip="Logout"
-              className="hover:bg-blue-50 "
+              className="rounded-xl px-3.5 py-2.5 h-11 text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition-all cursor-pointer"
             >
               <button
                 onClick={logout}
-                className="flex cursor-pointer items-center gap-3"
+                className="flex items-center gap-3.5 w-full text-left"
               >
-                <LogOut color="#219CAE" className="h-5 w-5" />
-                <span>Logout</span>
+                <LogOut className="h-5 w-5 text-slate-400 group-hover:text-rose-500 shrink-0" />
+                <span className="text-sm font-medium">Logout</span>
               </button>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -133,3 +136,4 @@ export function AppSidebar({
     </Sidebar>
   );
 }
+

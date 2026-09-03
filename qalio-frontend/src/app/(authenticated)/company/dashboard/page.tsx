@@ -245,7 +245,7 @@ export default function CompanyDashboard() {
             <div className="space-y-3">
               <button
                 onClick={() => router.push("/company/jobs/create")}
-                className="inline-flex items-center px-6 py-3 bg-[#219CAE] text-white rounded-lg hover:bg-[#219CAE] transition-colors font-medium"
+                className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors font-medium shadow-xs"
               >
                 <PlusIcon className="w-4 h-4 mr-2" />
                 {isFirstTimeUser

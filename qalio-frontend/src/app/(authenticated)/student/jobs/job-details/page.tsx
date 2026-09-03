@@ -13,6 +13,7 @@ import { getCookie } from "@/utils/getCookie";
 import JobApplicationForm from "@/components/job-application-form";
 import type { IJob } from "@/types/job";
 import { useAuthStore } from "@/stores/auth-store";
+import CompanyAIChatbot from "@/components/company/CompanyAIChatbot";
 
 interface JobDetailsFromAPI extends IJob {
   eligibilityCheck?: {
@@ -962,6 +963,12 @@ export default function StudentJobDetailsPage() {
           </div>
         )}
       </div>
+
+      {/* Floating Company AI Assistant */}
+      <CompanyAIChatbot
+        companyId={typeof job?.companyId === "object" ? (job.companyId as any)?._id : (job?.companyId as string)}
+        companyName={typeof job?.companyId === "object" ? (job.companyId as any)?.name : "Company AI"}
+      />
     </div>
   );
 }
