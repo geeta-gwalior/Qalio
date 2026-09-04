@@ -43,6 +43,7 @@ import { useSecureExam } from "@/hooks/use-secure-exam";
 import { Timer } from "../../components/timer";
 import { QuestionTimer } from "../../components/question-timer";
 import { NavigationPanel } from "../../components/navigation-panel";
+import { ProctoringWidget } from "@/components/assessments/ProctoringWidget";
 import { getCookie } from "@/utils/getCookie";
 import type { AssessmentData, StudentResponse } from "@/types/assessment";
 import { useInternetConnectivity } from "@/hooks/internet-connectivity-hook";
@@ -478,6 +479,13 @@ export default function TestTakingPageComponent({
     onEscapePressed: handleEscapePressed,
     onAudioViolation: handleAudioViolation,
   });
+
+  const [trustScore, setTrustScore] = useState(100);
+  useEffect(() => {
+    const switchPenalties = tabSwitchCount * 10;
+    const audioPenalties = audioViolationCount * 5;
+    setTrustScore(Math.max(0, 100 - switchPenalties - audioPenalties));
+  }, [tabSwitchCount, audioViolationCount]);
 
   // Clear all timers function
   const clearAllTimers = useCallback(() => {
@@ -1011,6 +1019,15 @@ export default function TestTakingPageComponent({
         {/* Navigation panel - collapsible on mobile */}
         {showNavPanel && (
           <div className="w-64 border-r bg-white flex flex-col overflow-y-auto">
+            {/* Proctoring Widget */}
+            <div className="p-4 border-b">
+               <ProctoringWidget
+                 trustScore={trustScore}
+                 tabSwitches={tabSwitchCount}
+                 warnings={securityWarnings}
+               />
+            </div>
+
             {/* Camera preview in sidebar */}
             {assessment.config.isCameraRequired && mediaStream && (
               <div className="p-4 border-b">

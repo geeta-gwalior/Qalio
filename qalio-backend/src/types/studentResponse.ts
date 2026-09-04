@@ -14,4 +14,11 @@ export interface IStudentResponse extends Document {
   totalMarksScored: number;
   status: "in-progress" | "submitted";
   evaluatedStatus: "pending" | "evaluated";
+  tabSwitchCount?: number;
+  trustScore?: number;
+  proctoringLogs?: {
+    event: string;
+    timestamp: Date;
+    details?: string;
+  }[];
 }

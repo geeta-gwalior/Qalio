@@ -23,11 +23,30 @@ interface JobDashboardProps {
   }>;
 }
 
+import { BrainCircuit, MailIcon } from "lucide-react";
+
+// Update Columns to include AI Score
 const columnsData = [
   { label: "Student Name", value: "studentName" },
   { label: "Batch", value: "batch" },
   { label: "Major", value: "major" },
   { label: "Application Status", value: "applicationStatus" },
+  {
+    label: "AI Match Score",
+    value: "aiMatchScore",
+    render: (row: any) => {
+      if (row.aiMatchScore) {
+        const isGood = row.aiMatchScore >= 80;
+        const isAvg = row.aiMatchScore >= 60;
+        return (
+          <span className={`px-2 py-1 rounded-full text-xs font-bold ${isGood ? 'bg-green-100 text-green-700' : isAvg ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`}>
+            {row.aiMatchScore}% Match
+          </span>
+        );
+      }
+      return <span className="text-gray-400 text-xs italic">Not Screened</span>;
+    },
+  },
   {
     label: "Application Date",
     value: "applicationDate",
@@ -45,43 +64,41 @@ export default function JobDashboard({ params }: JobDashboardProps) {
   const [batchFilter, setBatchFilter] = useState("All");
   const itemsPerPage = 6;
 
-  useEffect(() => {
-    const token = getCookie("jwt");
-
-    const fetchApplicants = async () => {
-      try {
-        if (!id) return;
-
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_QALIO_BACKEND_URL}/company/applicants-data/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        const applicantsData = res.data.data || [];
-
-        const formattedApplicants = applicantsData.map((applicant: any) => ({
-          ...applicant,
-          applicationDate: formatDate(applicant.applicationDate),
-        }));
-
-        setApplicants(formattedApplicants);
-        setFilteredApplicants(formattedApplicants);
-
-        if (formattedApplicants.length > 0) {
-          setSelectedJobInfo({
-            jobTitle: formattedApplicants[0].jobTitle,
-            jobType: formattedApplicants[0].jobType,
-          });
+  const fetchApplicants = async () => {
+    try {
+      if (!id) return;
+      const token = getCookie("jwt");
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_QALIO_BACKEND_URL}/company/applicants-data/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      } catch (err) {
-        console.error("Error fetching applicants", err);
-      }
-    };
+      );
 
+      const applicantsData = res.data.data || [];
+
+      const formattedApplicants = applicantsData.map((applicant: any) => ({
+        ...applicant,
+        applicationDate: formatDate(applicant.applicationDate),
+      }));
+
+      setApplicants(formattedApplicants);
+      setFilteredApplicants(formattedApplicants);
+
+      if (formattedApplicants.length > 0) {
+        setSelectedJobInfo({
+          jobTitle: formattedApplicants[0].jobTitle,
+          jobType: formattedApplicants[0].jobType,
+        });
+      }
+    } catch (err) {
+      console.error("Error fetching applicants", err);
+    }
+  };
+
+  useEffect(() => {
     fetchApplicants();
   }, [id]);
 
@@ -104,6 +121,41 @@ export default function JobDashboard({ params }: JobDashboardProps) {
   );
 
   const uniqueBatches = Array.from(new Set(applicants.map((a) => a.batch)));
+
+  const handleAIScreening = async (applicationId: string) => {
+    try {
+      const token = getCookie("jwt");
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_QALIO_BACKEND_URL}/job/application/${applicationId}/screen-ai`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("AI Screening completed successfully!");
+      fetchApplicants(); // refresh data
+    } catch (err) {
+      console.error(err);
+      alert("Failed to perform AI Screening");
+    }
+  };
+
+  const handleStatusChange = async (applicationId: string, status: string) => {
+    try {
+      const token = getCookie("jwt");
+      const confirmEmail = window.confirm(`Change status to ${status} and send automated email?`);
+      if (!confirmEmail) return;
+
+      await axios.put(
+        `${process.env.NEXT_PUBLIC_QALIO_BACKEND_URL}/job/application/${applicationId}/status`,
+        { status },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert(`Status updated and email sent to candidate!`);
+      fetchApplicants(); // refresh data
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update status");
+    }
+  };
 
   return (
     <div className="space-y-6 font-sans p-4 min-h-[300px]">
@@ -151,6 +203,24 @@ export default function JobDashboard({ params }: JobDashboardProps) {
             columnsData={columnsData}
             avatarRequired={false}
             actionButtons={[
+              {
+                name: "AI Screen",
+                icon: BrainCircuit,
+                onClick: (row) => handleAIScreening(row.applicationId),
+                type: "secondary",
+              },
+              {
+                name: "Shortlist",
+                icon: MailIcon,
+                onClick: (row) => handleStatusChange(row.applicationId, "Shortlisted"),
+                type: "primary",
+              },
+              {
+                name: "Reject",
+                icon: MailIcon,
+                onClick: (row) => handleStatusChange(row.applicationId, "Rejected"),
+                type: "danger",
+              },
               {
                 name: "View Resume",
                 icon: EyeIcon,

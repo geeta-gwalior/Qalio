@@ -24,6 +24,13 @@ export interface IApplication extends Document {
   lastUpdated: Date;
   companyNotes?: string;
   rejectionReason?: string;
+  aiMatchScore?: number;
+  aiMatchAnalysis?: {
+    matchedSkills: string[];
+    missingSkills: string[];
+    summary: string;
+    recommendation: "Strong Fit" | "Potential Fit" | "Low Fit";
+  };
 }
 
 const applicationSchema = new Schema<IApplication>(
@@ -88,6 +95,14 @@ const applicationSchema = new Schema<IApplication>(
     },
     rejectionReason: {
       type: String,
+    },
+    aiMatchScore: {
+      type: Number,
+      min: 0,
+      max: 100,
+    },
+    aiMatchAnalysis: {
+      type: mongoose.Schema.Types.Mixed,
     },
   },
   {

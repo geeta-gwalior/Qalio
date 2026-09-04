@@ -10,6 +10,7 @@ import {
   getStudentApplicationsWithJobs,
   applyToJobWithValidation,
   updateApplicationStatus,
+  screenApplicationWithAI,
   getJobApplications,
   getPublicJobs,
   // New imports for college approval
@@ -57,6 +58,7 @@ router.get("/student/:studentId/applications", getStudentApplicationsWithJobs);
 router.post("/apply", applyToJob);
 router.post("/apply-with-validation", applyToJobWithValidation);
 router.put("/application/:applicationId/status", updateApplicationStatus);
+router.post("/application/:applicationId/screen-ai", screenApplicationWithAI);
 router.get("/:jobId/applications", getJobApplications);
 
 // Resume upload

@@ -765,6 +765,13 @@ import { Job } from "../../models/job/job.model";
 import { Application } from "../../models/application/application.model";
 import mongoose from "mongoose";
 import type { ICollege } from "../../types/collegeSchemas";
+import sendEmail from "../../utils/email/sendEmail";
+import {
+  getShortlistedEmailTemplate,
+  getRejectedEmailTemplate,
+  getAssessmentInviteEmailTemplate,
+} from "../../utils/email/emailTemplates";
+import { screenResumeWithAI } from "../../services/resumeScreening.service";
 import cloudinary from "cloudinary";
 import multer from "multer";
 
@@ -1944,15 +1951,26 @@ export const getStudentApplicationsWithJobs = catchAsyncErrors(
   }
 );
 
-// Update Application Status
+// Update Application Status & Send Automated Emails
 export const updateApplicationStatus = catchAsyncErrors(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { applicationId } = req.params;
-    const { status, assessmentScore, companyNotes, rejectionReason } = req.body;
+    const { status, assessmentScore, companyNotes, rejectionReason, customEmailMessage } = req.body;
 
-    const application = await Application.findById(applicationId);
+    const application = await Application.findById(applicationId)
+      .populate({
+        path: "studentId",
+        populate: { path: "userId", select: "name email" },
+      })
+      .populate({
+        path: "jobId",
+        populate: { path: "company", select: "companyName name" },
+      });
+
     if (!application)
       return next(new ErrorHandler("Application not found", 404));
+
+    const oldStatus = application.status;
 
     // Update fields
     if (status) application.status = status;
@@ -1965,10 +1983,115 @@ export const updateApplicationStatus = catchAsyncErrors(
 
     await application.save();
 
+    // Trigger Automated Email Dispatches on Status Change
+    try {
+      const studentObj: any = application.studentId;
+      const userObj = studentObj?.userId;
+      const jobObj: any = application.jobId;
+      const companyObj = jobObj?.company;
+
+      const candidateEmail = userObj?.email;
+      const candidateName = userObj?.name || "Applicant";
+      const jobTitle = jobObj?.title || "Position";
+      const companyName = companyObj?.companyName || companyObj?.name || "Qalio Hiring Partner";
+
+      if (candidateEmail && status && status !== oldStatus) {
+        if (status === "Shortlisted") {
+          const html = getShortlistedEmailTemplate({
+            candidateName,
+            jobTitle,
+            companyName,
+            customMessage: customEmailMessage,
+          });
+          sendEmail({
+            email: candidateEmail,
+            subject: `🎉 Congratulations! Shortlisted for ${jobTitle} at ${companyName}`,
+            html,
+          });
+        } else if (status === "Rejected") {
+          const html = getRejectedEmailTemplate({
+            candidateName,
+            jobTitle,
+            companyName,
+            customMessage: rejectionReason || customEmailMessage,
+          });
+          sendEmail({
+            email: candidateEmail,
+            subject: `Application Update: ${jobTitle} at ${companyName}`,
+            html,
+          });
+        } else if (status === "Assessment Pending") {
+          const html = getAssessmentInviteEmailTemplate({
+            candidateName,
+            jobTitle,
+            companyName,
+            customMessage: customEmailMessage,
+          });
+          sendEmail({
+            email: candidateEmail,
+            subject: `📝 Skill Assessment Invitation for ${jobTitle} at ${companyName}`,
+            html,
+          });
+        }
+      }
+    } catch (emailErr) {
+      console.error("[AUTOMATED EMAIL DISPATCH ERROR]:", emailErr);
+    }
+
     res.status(200).json({
       success: true,
       message: "Application status updated successfully",
       application,
+    });
+  }
+);
+
+// AI Resume Screening Controller
+export const screenApplicationWithAI = catchAsyncErrors(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { applicationId } = req.params;
+
+    const application = await Application.findById(applicationId)
+      .populate({
+        path: "studentId",
+        populate: { path: "userId", select: "name email" },
+      })
+      .populate("jobId");
+
+    if (!application) return next(new ErrorHandler("Application not found", 404));
+
+    const studentObj: any = application.studentId;
+    const jobObj: any = application.jobId;
+
+    if (!jobObj) return next(new ErrorHandler("Associated Job not found", 404));
+
+    // Compile candidate text from student profile, cover letter, and application data
+    let candidateText = `
+Name: ${studentObj?.userId?.name || "Candidate"}
+Email: ${studentObj?.userId?.email || ""}
+Cover Letter: ${application.coverLetter || "None provided"}
+Skills: ${Array.isArray(studentObj?.skills) ? studentObj.skills.join(", ") : studentObj?.skills || ""}
+Education: ${JSON.stringify(studentObj?.education || {})}
+Experience: ${JSON.stringify(studentObj?.experience || {})}
+Application Data: ${JSON.stringify(application.applicationData || {})}
+`;
+
+    const screeningResult = await screenResumeWithAI(candidateText, {
+      title: jobObj.title || "Job Opening",
+      description: jobObj.description || "",
+      skillsRequired: Array.isArray(jobObj.skillsRequired) ? jobObj.skillsRequired : [],
+      experienceRequired: jobObj.experienceRequired || "",
+    });
+
+    application.aiMatchScore = screeningResult.aiMatchScore;
+    application.aiMatchAnalysis = screeningResult.aiMatchAnalysis;
+    await application.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Application screened with AI successfully",
+      aiMatchScore: application.aiMatchScore,
+      aiMatchAnalysis: application.aiMatchAnalysis,
     });
   }
 );

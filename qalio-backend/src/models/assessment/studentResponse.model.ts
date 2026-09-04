@@ -30,6 +30,15 @@ const studentResponseSchema = new Schema<IStudentResponse>(
       enum: ["pending", "evaluated"],
       default: "pending",
     },
+    tabSwitchCount: { type: Number, default: 0 },
+    trustScore: { type: Number, default: 100 },
+    proctoringLogs: [
+      {
+        event: { type: String, required: true },
+        timestamp: { type: Date, default: Date.now },
+        details: { type: String },
+      },
+    ],
   },
   { timestamps: true }
 );

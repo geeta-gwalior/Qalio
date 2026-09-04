@@ -762,3 +762,51 @@ export const evaluateManualAssessmentResults = catchAsyncErrors(
     });
   }
 );
+
+// Log Proctoring Anti-Cheat Event
+export const logProctoringEvent = catchAsyncErrors(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { responseId, assessmentId, studentId, event, details } = req.body;
+
+    let responseRecord;
+    if (responseId) {
+      responseRecord = await StudentResponse.findById(responseId);
+    } else if (assessmentId && studentId) {
+      responseRecord = await StudentResponse.findOne({
+        assessment: assessmentId,
+        student: studentId,
+      });
+    }
+
+    if (!responseRecord) {
+      res.status(200).json({ success: true, message: "Response record not found yet" });
+      return;
+    }
+
+    if (!responseRecord.proctoringLogs) {
+      responseRecord.proctoringLogs = [];
+    }
+
+    responseRecord.proctoringLogs.push({
+      event: event || "UNKNOWN_EVENT",
+      timestamp: new Date(),
+      details: details || "",
+    });
+
+    if (event === "TAB_SWITCH" || event === "WINDOW_BLUR") {
+      responseRecord.tabSwitchCount = (responseRecord.tabSwitchCount || 0) + 1;
+    }
+
+    const switchPenalties = (responseRecord.tabSwitchCount || 0) * 10;
+    responseRecord.trustScore = Math.max(0, 100 - switchPenalties);
+
+    await responseRecord.save();
+
+    res.status(200).json({
+      success: true,
+      tabSwitchCount: responseRecord.tabSwitchCount,
+      trustScore: responseRecord.trustScore,
+      proctoringLogs: responseRecord.proctoringLogs,
+    });
+  }
+);

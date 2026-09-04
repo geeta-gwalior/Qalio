@@ -394,6 +394,36 @@ export default function StudentResultPage({
                   </table>
                 </div>
               </Card>
+
+              {/* Proctoring Details */}
+              <Card className="overflow-hidden">
+                <div className="p-4 bg-gray-50 border-b">
+                  <h3 className="font-medium text-gray-900">Proctoring Details</h3>
+                </div>
+                <div className="p-4 space-y-4">
+                  <div className="flex justify-between items-center border-b pb-2">
+                    <span className="text-sm text-gray-600">Trust Score</span>
+                    <span className={`font-bold ${(selectedAttempt?.trustScore ?? 100) >= 80 ? 'text-green-600' : 'text-red-600'}`}>
+                      {selectedAttempt?.trustScore ?? 100}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center border-b pb-2">
+                    <span className="text-sm text-gray-600">Tab Switches</span>
+                    <span className="font-semibold text-gray-900">{selectedAttempt?.tabSwitchCount ?? 0}</span>
+                  </div>
+                  
+                  {selectedAttempt?.proctoringLogs && selectedAttempt.proctoringLogs.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-sm font-medium mb-2">Logs:</p>
+                      <ul className="text-xs text-gray-600 list-disc pl-4 space-y-1">
+                        {selectedAttempt.proctoringLogs.map((log: any, idx: number) => (
+                          <li key={idx}>[{formatDate(log.timestamp)}] {log.eventType} - {log.details}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </Card>
             </div>
           </div>
 
